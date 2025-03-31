@@ -9,7 +9,7 @@ import ReportForm from '../pages/ReportForm';
 const AppRoutes: React.FC = () => {
   return (
     <Routes>
-      <Route path="/" element={<Dashboard />} />
+      <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/report" element={<ReportForm />} />
