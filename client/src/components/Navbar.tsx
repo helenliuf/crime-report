@@ -20,7 +20,7 @@ const Navbar: React.FC = () => {
 
       {user && (
         <div className="nav-center">
-          <span className="greeting">Hello, {user.name.split(' ')[0]} 👋</span>
+          <span className="greeting">Hello, {user.name.split(' ')[0]}!</span>
         </div>
       )}
 
