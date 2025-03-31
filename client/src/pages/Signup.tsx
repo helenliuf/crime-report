@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/signup.css';
 import { useAuth } from '../context/AuthContext';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 interface User {
   name: string;
@@ -81,9 +82,9 @@ const Signup: React.FC = () => {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Create a strong password"
           />
-          <button type="button" onClick={() => setShowPassword(!showPassword)} className="toggle-visibility">
-            {showPassword ? 'Hide' : 'Show'}
-          </button>
+          <span className="eye-icon" onClick={() => setShowPassword(!showPassword)}>
+            {showPassword ? <FaEyeSlash /> : <FaEye />}
+          </span>
         </div>
         <p className={`password-strength ${strength.toLowerCase()}`}>Strength: {strength}</p>
 
@@ -95,9 +96,9 @@ const Signup: React.FC = () => {
             required
             onChange={(e) => setConfirmPassword(e.target.value)}
           />
-          <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="toggle-visibility">
-            {showConfirmPassword ? 'Hide' : 'Show'}
-          </button>
+          <span className="eye-icon" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
+            {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+          </span>
         </div>
 
         <button type="submit" className={success ? 'signup-button success' : 'signup-button'}>
