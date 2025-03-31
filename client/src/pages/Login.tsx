@@ -1,19 +1,43 @@
-import React from 'react';
+import React, { useState } from 'react';
+import '../styles/login.css';
 
 const Login: React.FC = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('Logging in with:', email, password);
+
+    // TODO: Call backend API with email & password
+  };
+
   return (
-    <div style={styles.container}>
-      <h1>Login Page</h1>
-      <p>This is a placeholder for the login form.</p>
+    <div className="login-container">
+      <h2>Login</h2>
+      <form onSubmit={handleLogin} className="login-form">
+        <label>Email</label>
+        <input
+          type="email"
+          value={email}
+          required
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Enter your email"
+        />
+
+        <label>Password</label>
+        <input
+          type="password"
+          value={password}
+          required
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Enter your password"
+        />
+
+        <button type="submit">Login</button>
+      </form>
     </div>
   );
-};
-
-const styles: { [key: string]: React.CSSProperties } = {
-  container: {
-    padding: '2rem',
-    textAlign: 'center'
-  }
 };
 
 export default Login;
