@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
 import '../styles/reportform.css';
 import { useAuth } from '../context/AuthContext';
 
@@ -17,16 +17,17 @@ interface CrimeReport {
 
 const ReportForm: React.FC = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [type, setType] = useState('');
   const [location, setLocation] = useState('');
-  const [error, setError] = useState('');
   const [age, setAge] = useState('');
   const [height, setHeight] = useState('');
   const [weight, setWeight] = useState('');
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,13 +53,17 @@ const ReportForm: React.FC = () => {
     existingReports.push(report);
     localStorage.setItem('crimeReports', JSON.stringify(existingReports));
 
-    alert('Crime reported successfully!');
     setTitle('');
     setDescription('');
     setType('');
     setLocation('');
+    setAge('');
+    setHeight('');
+    setWeight('');
     setError('');
-    navigate('/report');
+    setSuccess(true);
+
+    setTimeout(() => setSuccess(false), 3000);
   };
 
   return (
@@ -70,15 +75,6 @@ const ReportForm: React.FC = () => {
 
           <label>Title</label>
           <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} required />
-
-          <label>Age (approximate)</label>
-          <input type="number" min="0" value={age} onChange={(e) => setAge(e.target.value)} placeholder="e.g. 25"/>
-
-          <label>Height approximate (in cm)</label>
-          <input type="text" value={height} onChange={(e) => setHeight(e.target.value)} placeholder="e.g. 170"/>
-
-          <label>Weight approximate (in lbs)</label>
-          <input type="text" value={weight} onChange={(e) => setWeight(e.target.value)} placeholder="e.g. 70"/>
 
           <label>Description</label>
           <textarea value={description} onChange={(e) => setDescription(e.target.value)} required />
@@ -92,11 +88,26 @@ const ReportForm: React.FC = () => {
             <option value="Other">Other</option>
           </select>
 
+          <label>Age (approximate)</label>
+          <input type="number" min="0" value={age} onChange={(e) => setAge(e.target.value)} />
+
+          <label>Height (in cm)</label>
+          <input type="text" value={height} onChange={(e) => setHeight(e.target.value)} />
+
+          <label>Weight (in kg)</label>
+          <input type="text" value={weight} onChange={(e) => setWeight(e.target.value)} />
+
           <label>Location</label>
           <input type="text" value={location} onChange={(e) => setLocation(e.target.value)} required />
 
           <button type="submit">Submit Report</button>
         </form>
+
+        {success && (
+          <div className="report-success">
+            ✅ Crime reported successfully!
+          </div>
+        )}
       </div>
     </div>
   );

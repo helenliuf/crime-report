@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/login.css';
 import { useAuth } from '../context/AuthContext';
@@ -13,15 +13,10 @@ const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
-  const { login, user } = useAuth();
-  const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
 
-  // 🔁 Auto-redirect if already logged in
-  useEffect(() => {
-    if (user) {
-      navigate('/dashboard');
-    }
-  }, [user, navigate]);
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,13 +47,26 @@ const Login: React.FC = () => {
         <input type="email" value={email} required onChange={(e) => setEmail(e.target.value)} />
 
         <label>Password</label>
-        <input type="password" value={password} required onChange={(e) => setPassword(e.target.value)} />
+        <div className="password-wrapper">
+          <input
+            type={showPassword ? 'text' : 'password'}
+            value={password}
+            required
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <button type="button" onClick={() => setShowPassword(!showPassword)} className="toggle-visibility">
+            {showPassword ? 'Hide' : 'Show'}
+          </button>
+        </div>
 
         {errorMsg && <p style={{ color: 'red' }}>{errorMsg}</p>}
 
         <button type="submit">Login</button>
       </form>
-      <p>Don’t have an account? <a href="/signup">Sign up here</a></p>
+
+      <div className="back-to-signup">
+        Don’t have an account? <a href="/signup">Sign up here</a>
+      </div>
     </div>
   );
 };
