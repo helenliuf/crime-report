@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/login.css';
 import { useAuth } from '../context/AuthContext';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 interface User {
   name: string;
@@ -54,9 +55,9 @@ const Login: React.FC = () => {
             required
             onChange={(e) => setPassword(e.target.value)}
           />
-          <button type="button" onClick={() => setShowPassword(!showPassword)} className="toggle-visibility">
-            {showPassword ? 'Hide' : 'Show'}
-          </button>
+          <span className="eye-icon" onClick={() => setShowPassword(!showPassword)}>
+            {showPassword ? <FaEyeSlash /> : <FaEye />}
+          </span>
         </div>
 
         {errorMsg && <p style={{ color: 'red' }}>{errorMsg}</p>}

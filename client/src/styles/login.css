@@ -107,16 +107,22 @@
 
 .password-wrapper input {
   width: 100%;
-  padding-right: 4rem;
+  padding-right: 2.5rem;
 }
 
-.toggle-visibility {
+.eye-icon {
   position: absolute;
   right: 0.75rem;
-  background: none;
-  border: none;
-  color: #2563eb;
-  font-size: 0.9rem;
   cursor: pointer;
-  font-weight: 600;
+  color: #6b7280;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  transition: color 0.2s ease;
+}
+
+.eye-icon:hover {
+  color: #1d4ed8;
 }
