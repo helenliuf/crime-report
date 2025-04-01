@@ -4,40 +4,48 @@ import '../styles/login.css';
 import { useAuth } from '../context/AuthContext';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
-interface User {
-  name: string;
-  email: string;
-  password: string;
-}
-
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errorMsg, setErrorMsg] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-
-  const { login } = useAuth();
+  const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { login } = useAuth();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
 
-    const users = JSON.parse(localStorage.getItem('users') || '[]') as User[];
-    const foundUser = users.find((user) => user.email === email);
+    try {
+      const url = `http://localhost:8080/api/user/login?email=${encodeURIComponent(
+        email
+      )}&password=${encodeURIComponent(password)}`;
 
-    if (!foundUser) {
-      alert('Email not found. Redirecting to signup...');
-      navigate('/signup');
-      return;
+      const response = await fetch(url, {
+        method: 'GET',
+        credentials: 'include',
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.message || 'Login failed');
+        return;
+      }
+
+      // ✅ Save token and user in localStorage
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+
+      // ✅ Set auth context
+      login(data.user);
+
+      // ✅ Redirect
+      navigate('/dashboard');
+    } catch (err) {
+      console.error('Login error:', err);
+      setError('Server error. Please try again later.');
     }
-
-    if (foundUser.password !== password) {
-      setErrorMsg('Incorrect password. Please try again.');
-      return;
-    }
-
-    login({ name: foundUser.name, email: foundUser.email });
-    navigate('/dashboard');
   };
 
   return (
@@ -45,7 +53,12 @@ const Login: React.FC = () => {
       <h2>Login</h2>
       <form onSubmit={handleLogin} className="login-form">
         <label>Email</label>
-        <input type="email" value={email} required onChange={(e) => setEmail(e.target.value)} />
+        <input
+          type="email"
+          value={email}
+          required
+          onChange={(e) => setEmail(e.target.value)}
+        />
 
         <label>Password</label>
         <div className="password-wrapper">
@@ -55,14 +68,17 @@ const Login: React.FC = () => {
             required
             onChange={(e) => setPassword(e.target.value)}
           />
-          <span className="eye-icon" onClick={() => setShowPassword(!showPassword)}>
+          <span
+            className="eye-icon"
+            onClick={() => setShowPassword(!showPassword)}
+          >
             {showPassword ? <FaEyeSlash /> : <FaEye />}
           </span>
         </div>
 
-        {errorMsg && <p style={{ color: 'red' }}>{errorMsg}</p>}
-
         <button type="submit">Login</button>
+
+        {error && <p className="error">{error}</p>}
       </form>
 
       <div className="back-to-signup">

@@ -9,6 +9,7 @@ var crimeRouter = require("./routes/crimeRoutes");
 const PORT = process.env.PORT || 8080;
 const path = require("path");
 const mongoose = require("mongoose");
+const cookieParser = require("cookie-parser");
 
 // Instantiating express application
 var app = express();
@@ -18,10 +19,12 @@ app.use(express.json());
 
 // Cors Config
 let corsoptions = {
-	// origin: "http://localhost:3000",
 	origin: "http://localhost:5173",
 	methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-};
+	credentials: true, // This is required for cookies/auth headers
+  };
+  
+app.use(cookieParser());
 app.use(cors(corsoptions));
 
 // ###### Connecting Router ######
