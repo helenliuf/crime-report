@@ -1,23 +1,9 @@
 import React, { useState } from 'react';
-// import { useNavigate } from 'react-router-dom';
 import '../styles/reportform.css';
 import { useAuth } from '../context/AuthContext';
 
-interface CrimeReport {
-  title: string;
-  description: string;
-  type: string;
-  location: string;
-  date: string;
-  reportedBy: string;
-  age?: string;
-  height?: string;
-  weight?: string;
-}
-
 const ReportForm: React.FC = () => {
   const { user } = useAuth();
-  // const navigate = useNavigate();
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -29,41 +15,62 @@ const ReportForm: React.FC = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!title || !description || !type || !location) {
-      setError('Please fill out all fields.');
+      setError('Please fill out all required fields.');
       return;
     }
 
-    const report: CrimeReport = {
-      title,
-      description,
-      type,
-      location,
-      date: new Date().toISOString(),
-      reportedBy: user?.email || user?.name || 'Anonymous',
-      age,
-      height,
-      weight
+    const token = localStorage.getItem("token");
+    const userData = localStorage.getItem("user");
+
+    if (!token || !userData) {
+      setError("You must be logged in to submit a report.");
+      return;
+    }
+
+    const parsedUser = JSON.parse(userData);
+
+    const payload = {
+      userId: parsedUser.id,
+      description: `${title} - ${description} | Age: ${age}, Height: ${height}, Weight: ${weight}`,
+      location: {
+        coordinates: [-72.526, 42.375] // 🔁 Replace with actual [longitude, latitude] later
+      },
+      status: "Pending"
     };
 
-    const existingReports = JSON.parse(localStorage.getItem('crimeReports') || '[]');
-    existingReports.push(report);
-    localStorage.setItem('crimeReports', JSON.stringify(existingReports));
+    try {
+      const response = await fetch("http://localhost:8080/api/crime", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      });
 
-    setTitle('');
-    setDescription('');
-    setType('');
-    setLocation('');
-    setAge('');
-    setHeight('');
-    setWeight('');
-    setError('');
-    setSuccess(true);
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.message || "Failed to submit");
+      }
 
-    setTimeout(() => setSuccess(false), 3000);
+      setTitle('');
+      setDescription('');
+      setType('');
+      setLocation('');
+      setAge('');
+      setHeight('');
+      setWeight('');
+      setError('');
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || "Something went wrong");
+    }
   };
 
   return (
