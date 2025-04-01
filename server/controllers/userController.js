@@ -36,45 +36,9 @@ exports.register = async (req, res) => {
 	}
 };
 
-exports.login = async (req, res) => {
-	try {
-		const { email, password } = req.body;
-
-		// Check if user exists
-		const user = await User.findOne({ email });
-		if (!user)
-			return res.status(400).json({ message: "Invalid Email/Password" });
-
-		const doesPwdMatch = await bcrypt.compare(password, user.password);
-		if (!doesPwdMatch)
-			return res.status(400).json({ message: "Invalid Email/Password" });
-
-		// Token Generation
-		const token = jwt.sign(
-			{ userId: user._id, role: user.role },
-			process.env.JWT_SECRET,
-			{ expiresIn: "7d" }
-		);
-
-		res.cookie("token", token, {
-			httpOnly: false,
-		}).json({
-			token,
-			user: {
-				id: user._id,
-				name: user.name,
-				email: user.email,
-				role: user.role,
-			},
-		});
-	} catch (error) {
-		res.status(500).json({ error: error.message });
-	}
-};
-
 /* exports.login = async (req, res) => {
 	try {
-	  const { email, password } = req.query;
+	  const { email, password } = req.body;
   
 	  if (!email || !password) {
 		return res.status(400).json({ message: "Missing email or password" });
