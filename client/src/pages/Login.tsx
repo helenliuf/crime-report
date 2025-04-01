@@ -18,12 +18,12 @@ const Login: React.FC = () => {
 
     try {
       const response = await fetch('http://localhost:8080/api/user/login', {
-        method: 'POST', // ✅ Correct method
+        method: 'POST', 
         headers: {
           'Content-Type': 'application/json',
         },
         credentials: 'include',
-        body: JSON.stringify({ email, password }), // ✅ Proper body
+        body: JSON.stringify({ email, password }), 
       });
 
       const data = await response.json();

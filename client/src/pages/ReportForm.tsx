@@ -37,7 +37,7 @@ const ReportForm: React.FC = () => {
       userId: parsedUser.id,
       description: `${title} - ${description} | Age: ${age}, Height: ${height}, Weight: ${weight}`,
       location: {
-        coordinates: [-72.526, 42.375] // 🔁 Replace with actual [longitude, latitude] later
+        coordinates: [-72.526, 42.375] 
       },
       status: "Pending"
     };
