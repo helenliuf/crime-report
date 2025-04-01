@@ -17,13 +17,13 @@ const Login: React.FC = () => {
     setError('');
 
     try {
-      const url = `http://localhost:8080/api/user/login?email=${encodeURIComponent(
-        email
-      )}&password=${encodeURIComponent(password)}`;
-
-      const response = await fetch(url, {
-        method: 'GET',
+      const response = await fetch('http://localhost:8080/api/user/login', {
+        method: 'POST', 
+        headers: {
+          'Content-Type': 'application/json',
+        },
         credentials: 'include',
+        body: JSON.stringify({ email, password }), 
       });
 
       const data = await response.json();
@@ -33,14 +33,10 @@ const Login: React.FC = () => {
         return;
       }
 
-      // ✅ Save token and user in localStorage
+      // Save token and user
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
-
-      // ✅ Set auth context
       login(data.user);
-
-      // ✅ Redirect
       navigate('/dashboard');
     } catch (err) {
       console.error('Login error:', err);
