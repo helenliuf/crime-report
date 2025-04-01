@@ -71,8 +71,6 @@ const addCrimeReport = async (req, res) => {
     }
 };
 
-
-
 module.exports = {
 	getAllCrimes,
 	getCrimeById,

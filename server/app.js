@@ -1,8 +1,8 @@
 var express = require("express");
 //Cross Origin Resource Sharing - Security Purposes
 const cors = require("cors");
-const dotenv = require('dotenv')
-dotenv.config()
+const dotenv = require("dotenv");
+dotenv.config();
 
 var userRouter = require("./routes/userRoutes");
 var crimeRouter = require("./routes/crimeRoutes");
@@ -34,16 +34,20 @@ if (!process.env.MONGO_URI) {
 	process.exit(1);
 }
 
-mongoose.connect(
-	process.env.MONGO_URI,
-	{ useNewUrlParser: true, useUnifiedTopology: true },
-	() => {
-		console.log("Connected to database!");
-	}
-);
-
-const db = mongoose.connection;
-db.on("error", (error) => console.error("MongoDB connection error:", error));
+mongoose
+	.connect(process.env.MONGO_URI, {
+		useNewUrlParser: true,
+		useUnifiedTopology: true,
+	})
+	.then(() => {
+		return mongoose.connection.db.admin().command({ ping: 1 });
+	})
+	.then(() => {
+		console.log("Connected to MongoDB!");
+	})
+	.catch((error) => {
+		console.error("MongoDB connection error:", error);
+	});
 
 // Listening to application on the PORT
 app.listen(PORT, () => console.log("Server is up and running!!"));
