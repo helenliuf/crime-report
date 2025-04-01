@@ -18,7 +18,8 @@ app.use(express.json());
 
 // Cors Config
 let corsoptions = {
-	origin: "http://localhost:3000",
+	// origin: "http://localhost:3000",
+	origin: "http://localhost:5173",
 	methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
 };
 app.use(cors(corsoptions));
