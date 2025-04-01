@@ -30,7 +30,8 @@ const Navbar: React.FC = () => {
           <li><Link to="/report">Report</Link></li>
           {!user ? (
             <>
-              <li><Link to="/login">Login</Link></li>
+              <li><Link to="/">Login</Link></li>
+              <li><Link to="/signup">Sign Up</Link></li>
 
             </>
           ) : (
