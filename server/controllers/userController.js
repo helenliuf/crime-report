@@ -36,7 +36,7 @@ exports.register = async (req, res) => {
 	}
 };
 
-/* exports.login = async (req, res) => {
+exports.login = async (req, res) => {
 	try {
 		const { email, password } = req.body;
 
@@ -70,9 +70,9 @@ exports.register = async (req, res) => {
 	} catch (error) {
 		res.status(500).json({ error: error.message });
 	}
-}; */
+};
 
-exports.login = async (req, res) => {
+/* exports.login = async (req, res) => {
 	try {
 	  const { email, password } = req.query;
   
@@ -107,4 +107,4 @@ exports.login = async (req, res) => {
 	  console.error("Login error:", error);
 	  res.status(500).json({ error: error.message });
 	}
-  };
+  }; */
