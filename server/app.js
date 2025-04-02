@@ -54,4 +54,6 @@ mongoose
 	});
 
 // Listening to application on the PORT
-app.listen(PORT, () => console.log("Server is up and running!!"));
+//app.listen(PORT, () => console.log("Server is up and running!!"));
+
+module.exports = app;

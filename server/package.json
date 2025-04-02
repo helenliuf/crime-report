@@ -2,7 +2,8 @@
   "name": "crime-report",
   "version": "1.0.0",
   "scripts": {
-    "start": "nodemon app.js"
+    "start": "nodemon server.js",
+    "test": "jest --detectOpenHandles"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
@@ -14,6 +15,12 @@
     "mongoose": "^7.0.0"
   },
   "devDependencies": {
+    "jest": "^29.7.0",
+    "mongodb-memory-server": "^10.1.4",
+    "node-mocks-http": "^1.16.2",
     "nodemon": "^2.0.19"
+  },
+  "jest": {
+    "testEnvironment": "node"
   }
 }
