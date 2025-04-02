@@ -1,5 +1,5 @@
 const CrimeReport = require("../../models/CrimeReport"); 
-const { getAllCrimes, getCrimeById } = require("../../controllers/crimeController");
+const { getAllCrimes, getCrimeById, addCrimeReport } = require("../../controllers/crimeController");
 const httpMocks = require("node-mocks-http");
 
 const { MongoMemoryServer } = require('mongodb-memory-server');
@@ -57,7 +57,6 @@ describe("getAllCrimes function", () => {
       await getAllCrimes(req, res);
 
       const responseData = res._getJSONData();
-      //console.log(responseData);
 
       // verify status, length of response array, and correct crimes
       expect(res.statusCode).toBe(200);
@@ -143,9 +142,10 @@ describe("getCrimeById function", () => {
 
       await crime1.save();
 
+      // get _id of crime
       const crimeId = crime1._id.toString();
-      //console.log(crimeId);
 
+      // getCrimeById with mock request and response
       const req = httpMocks.createRequest({
           params: { id: crimeId },
       });
@@ -153,8 +153,8 @@ describe("getCrimeById function", () => {
 
       await getCrimeById(req, res);
 
+      // assertions for status and correct crime retrieved
       const responseData = res._getJSONData();
-      //console.log(responseData);
 
       expect(res.statusCode).toBe(200);
       expect(responseData).toEqual(
@@ -194,6 +194,7 @@ describe("getCrimeById function", () => {
 
       const crimeId = crime1._id.toString();
 
+      // getCrimeById with mock request and response
       const req = httpMocks.createRequest({
           params: { id: crimeId },
       });
@@ -201,6 +202,7 @@ describe("getCrimeById function", () => {
 
       await getCrimeById(req, res);
 
+      // assertions for status and correct crime retrieved
       const responseData = res._getJSONData();
       console.log(responseData);
 
@@ -216,6 +218,9 @@ describe("getCrimeById function", () => {
   }, 20000);
 
   it("should return 404 if crime not found", async () => {
+      // do not add anything to mock collection -- 0 crimes
+
+      // mock response and request for getCrimeById
       const req = httpMocks.createRequest({
           params: { id: "67eb6b2f551fd82eaa773b3c" },
       });
@@ -223,9 +228,7 @@ describe("getCrimeById function", () => {
 
       await getCrimeById(req, res);
 
-      const responseData = res._getJSONData();
-      console.log(responseData);
-
+      // assertions for status and correct error message
       expect(res.statusCode).toBe(404);
       expect(res._getJSONData()).toEqual({
           message: "Crime not found",
@@ -234,6 +237,9 @@ describe("getCrimeById function", () => {
   }, 20000);
 
   it("should handle errors and return 500 status", async () => {
+      // do not add anything to mock collection -- 0 crimes
+
+      // mock response and request for getCrimeById
       const req = httpMocks.createRequest({
           params: { id: "10" },
       });
@@ -241,14 +247,75 @@ describe("getCrimeById function", () => {
 
       await getCrimeById(req, res);
 
-      const responseData = res._getJSONData();
-      console.log(responseData);
-
+      // assertions for 500 error code and error message
       expect(res.statusCode).toBe(500);
       expect(res._getJSONData()).toEqual({
           message: "Error fetching crime",
           error: expect.any(Object)
       });
   });
+
+});
+
+describe("addCrimeReport function", () => {
+  let mongoServer;
+
+  beforeAll(async () => {
+    mongoServer = await MongoMemoryServer.create();
+    const uri = mongoServer.getUri();
+    await mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+  });
+
+  afterAll(async () => {
+      await mongoose.connection.close();
+      await mongoServer.stop();
+  });
+
+  beforeEach(async () => {
+      await CrimeReport.deleteMany(); // clear the collection before each test
+  });
+
+  it("should correctly add a new report", async () => {
+    // create request with body containing crime to add
+    const req = httpMocks.createRequest({
+      body: {
+        userId: "67eb068de7c90f14553d931d",
+        description: "Suspicious activity reported near the park.",
+        location: {
+            coordinates: [-71.0589, 42.3601]
+        },
+        status: "Pending",
+      }
+    });
+
+    const res = httpMocks.createResponse();
+
+    // addCrimeReport req and res
+    await addCrimeReport(req, res);
+
+    const responseData = res._getJSONData();
+
+    // assertions for status code and correct response containing crime
+    expect(res.statusCode).toBe(201);
+    expect(responseData).toEqual(
+        expect.objectContaining({
+          userId: "67eb068de7c90f14553d931d",
+          description: "Suspicious activity reported near the park.",
+          status: "Pending",
+        })
+    );
+
+    // assertions checking crime quantity in mock model
+    const res_check = httpMocks.createResponse();
+    const req_check = httpMocks.createRequest();
+
+    await getAllCrimes(req_check, res_check);
+
+    const responseCheckData = res_check._getJSONData();
+
+    expect(res_check.statusCode).toBe(200);
+    expect(responseCheckData).toHaveLength(1);
+
+  }, 20000);
 
 });
