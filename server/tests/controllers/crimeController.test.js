@@ -1,5 +1,5 @@
 const CrimeReport = require("../../models/CrimeReport"); 
-const { getAllCrimes, getCrimeById, addCrimeReport } = require("../../controllers/crimeController");
+const { getAllCrimes, getCrimeById, addCrimeReport, getNearbyCrimes } = require("../../controllers/crimeController");
 const httpMocks = require("node-mocks-http");
 
 const { MongoMemoryServer } = require('mongodb-memory-server');
@@ -317,5 +317,100 @@ describe("addCrimeReport function", () => {
     expect(responseCheckData).toHaveLength(1);
 
   }, 20000);
+
+});
+
+describe("getNearbyCrimes function", () => {
+  let mongoServer;
+
+  beforeAll(async () => {
+      mongoServer = await MongoMemoryServer.create();
+      const uri = mongoServer.getUri();
+      await mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+  });
+
+  afterAll(async () => {
+      await mongoose.connection.close();
+      await mongoServer.stop();
+  });
+
+  beforeEach(async () => {
+      await CrimeReport.deleteMany(); // clear the collection before each test
+  });
+
+  it("should correctly return nearby crimes", async () => {
+    // dummy crimes
+    const crime1 = new CrimeReport({
+      location: { type: "Point", coordinates: [-71.0589, 42.3601] },
+      userId: "67eb6b2f551fd82eaa773b3c",
+      description: "Theft reported near the mall.",
+      status: "Pending",
+    });
+
+    const crime2 = new CrimeReport({
+        location: { type: "Point", coordinates: [-71.0590, 42.3610] },
+        userId: "67eb6b2f551fd82eaa773b3c",
+        description: "Assault reported in the alley.",
+        status: "Verified",
+    });
+
+    await CrimeReport.insertMany([crime1, crime2]);
+
+    // mock request and response and getNearbyCrimes call
+    const req = httpMocks.createRequest({
+        query: { latitude: 42.3601, longitude: -71.0589, radius: 1 },
+    });
+    const res = httpMocks.createResponse();
+
+    await getNearbyCrimes(req, res);
+
+    // assertions for status, num of crimes returned, and correct crimes
+    const responseData = res._getJSONData();
+    expect(res.statusCode).toBe(200);
+    expect(responseData.length).toBeGreaterThan(0);
+    expect(responseData).toEqual(
+        expect.arrayContaining([
+            expect.objectContaining({ description: "Theft reported near the mall." }),
+            expect.objectContaining({ description: "Assault reported in the alley." }),
+        ])
+    );
+  });
+
+  it("should correctly throw 400 error if missing params", async () => {
+    // mock request without query params and getNearbyCrimes call
+    const req = httpMocks.createRequest({ query: {} });
+    const res = httpMocks.createResponse();
+
+    await getNearbyCrimes(req, res);
+
+    // verify 400 status and error message
+    expect(res.statusCode).toBe(400);
+    expect(res._getJSONData()).toEqual({
+        message: "Latitude, longitude, and radius are required",
+    });
+  });
+
+  it("should correctly handle 500 error", async () => {
+    // mock error in retrieval
+    jest.spyOn(CrimeReport, "find").mockImplementationOnce(() => {
+      throw new Error("Database query failed");
+    });
+
+    // mock req and response and getNearbyCrimes call
+    const req = httpMocks.createRequest({
+        query: { latitude: 42.3601, longitude: -71.0589, radius: 1 },
+    });
+    const res = httpMocks.createResponse();
+
+    await getNearbyCrimes(req, res);
+
+    // assertions for 500 status and error message
+    expect(res.statusCode).toBe(500);
+    expect(res._getJSONData()).toEqual({
+        message: "Error fetching nearby crimes",
+        error: expect.any(Object),
+    });
+  });
+
 
 });
