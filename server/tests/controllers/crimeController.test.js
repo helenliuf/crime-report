@@ -1,5 +1,5 @@
 const CrimeReport = require("../../models/CrimeReport"); 
-const { getAllCrimes } = require("../../controllers/crimeController");
+const { getAllCrimes, getCrimeById } = require("../../controllers/crimeController");
 const httpMocks = require("node-mocks-http");
 
 const { MongoMemoryServer } = require('mongodb-memory-server');
@@ -112,4 +112,143 @@ describe("getAllCrimes function", () => {
       CrimeReport.find.mockRestore();
 
   }, 20000);
+});
+
+describe("getCrimeById function", () => {
+  let mongoServer;
+
+  beforeAll(async () => {
+      mongoServer = await MongoMemoryServer.create();
+      const uri = mongoServer.getUri();
+      await mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+  });
+
+  afterAll(async () => {
+      await mongoose.connection.close();
+      await mongoServer.stop();
+  });
+
+  beforeEach(async () => {
+      await CrimeReport.deleteMany(); // clear the collection before each test
+  });
+
+  it("should correctly return 1 crime by id", async () => {
+      // declare dummy crime
+      const crime1 = new CrimeReport({
+          location: { type: "Point", coordinates: [-71.0765, 42.3554] },
+          userId: "67eb6b2f551fd82eaa773b3c",
+          description: "Vandalism reported near the school.",
+          status: "Resolved",
+      });
+
+      await crime1.save();
+
+      const crimeId = crime1._id.toString();
+      //console.log(crimeId);
+
+      const req = httpMocks.createRequest({
+          params: { id: crimeId },
+      });
+      const res = httpMocks.createResponse();
+
+      await getCrimeById(req, res);
+
+      const responseData = res._getJSONData();
+      //console.log(responseData);
+
+      expect(res.statusCode).toBe(200);
+      expect(responseData).toEqual(
+          expect.objectContaining({
+              _id: crimeId,
+              description: "Vandalism reported near the school.",
+              status: "Resolved",
+          })
+      );
+  }, 20000);
+
+  it("should correctly return 1 crime by id out of many", async () => {
+      // declare dummy crimes
+      const crime1 = new CrimeReport({
+          location: { type: "Point", coordinates: [-71.0765, 42.3554] },
+          userId: "67eb6b2f551fd82eaa773b3c",
+          description: "Vandalism reported near the school.",
+          status: "Resolved",
+      });
+
+      const crime2 = new CrimeReport({
+          location: { type: "Point", coordinates: [-71.0565, 42.4554] },
+          userId: "67eb6b2f551fd82eaa773b3c",
+          description: "House Robbery.",
+          status: "Verified",
+      });
+
+      const crime3 = new CrimeReport({
+          location: { type: "Point", coordinates: [-71.1565, 42.4553] },
+          userId: "67eb6b2f551fd82eaa773b3c",
+          description: "Hit and Run.",
+          status: "Verified",
+      });
+
+      // add dummy crimes to mock collection
+      await CrimeReport.insertMany([crime1, crime2, crime3]);
+
+      const crimeId = crime1._id.toString();
+
+      const req = httpMocks.createRequest({
+          params: { id: crimeId },
+      });
+      const res = httpMocks.createResponse();
+
+      await getCrimeById(req, res);
+
+      const responseData = res._getJSONData();
+      console.log(responseData);
+
+      expect(res.statusCode).toBe(200);
+      expect(responseData).toEqual(
+          expect.objectContaining({
+              _id: crimeId,
+              description: "Vandalism reported near the school.",
+              status: "Resolved",
+          })
+      );
+
+  }, 20000);
+
+  it("should return 404 if crime not found", async () => {
+      const req = httpMocks.createRequest({
+          params: { id: "67eb6b2f551fd82eaa773b3c" },
+      });
+      const res = httpMocks.createResponse();
+
+      await getCrimeById(req, res);
+
+      const responseData = res._getJSONData();
+      console.log(responseData);
+
+      expect(res.statusCode).toBe(404);
+      expect(res._getJSONData()).toEqual({
+          message: "Crime not found",
+      });
+
+  }, 20000);
+
+  it("should handle errors and return 500 status", async () => {
+      const req = httpMocks.createRequest({
+          params: { id: "10" },
+      });
+      const res = httpMocks.createResponse();
+
+      await getCrimeById(req, res);
+
+      const responseData = res._getJSONData();
+      console.log(responseData);
+
+      expect(res.statusCode).toBe(500);
+      expect(res._getJSONData()).toEqual({
+          message: "Error fetching crime",
+          error: expect.any(Object)
+      });
+  });
+
 });
