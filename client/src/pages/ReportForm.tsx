@@ -1,24 +1,57 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../styles/reportform.css';
 import { useAuth } from '../context/AuthContext';
+import { useLocation, useNavigate } from 'react-router-dom';
+
+interface ReportFormData {
+  title: string;
+  description: string;
+  type: string;
+  locationText: string;
+  age: string;
+  height: string;
+  weight: string;
+}
 
 const ReportForm: React.FC = () => {
   const { user } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const coordinates = location.state?.coordinates;
 
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [type, setType] = useState('');
-  const [location, setLocation] = useState('');
-  const [age, setAge] = useState('');
-  const [height, setHeight] = useState('');
-  const [weight, setWeight] = useState('');
+  const [formData, setFormData] = useState<ReportFormData>({
+    title: '',
+    description: '',
+    type: '',
+    locationText: '',
+    age: '',
+    height: '',
+    weight: ''
+  });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    if (coordinates) {
+      setFormData(prev => ({
+        ...prev,
+        locationText: `${coordinates.lat.toFixed(6)}, ${coordinates.lng.toFixed(6)}`
+      }));
+    }
+  }, [coordinates]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!title || !description || !type || !location) {
+    if (!formData.title || !formData.description || !formData.type || !formData.locationText) {
       setError('Please fill out all required fields.');
       return;
     }
@@ -35,10 +68,11 @@ const ReportForm: React.FC = () => {
 
     const payload = {
       userId: parsedUser.id,
-      description: `${title} - ${description} | Age: ${age}, Height: ${height}, Weight: ${weight}`,
+      description: `${formData.title} - ${formData.description} | Age: ${formData.age}, Height: ${formData.height}, Weight: ${formData.weight}`,
       location: {
-        coordinates: [-72.526, 42.375] 
+        coordinates: coordinates ? [coordinates.lng, coordinates.lat] : [-72.526, 42.375]
       },
+      type: formData.type,
       status: "Pending"
     };
 
@@ -57,13 +91,34 @@ const ReportForm: React.FC = () => {
         throw new Error(err.message || "Failed to submit");
       }
 
-      setTitle('');
-      setDescription('');
-      setType('');
-      setLocation('');
-      setAge('');
-      setHeight('');
-      setWeight('');
+      const newReport = await response.json();
+
+      // If we came from the map, send the new report back
+      if (location.state?.returnToMap) {
+        window.postMessage({
+          type: 'NEW_REPORT',
+          report: {
+            id: newReport.id,
+            lat: coordinates.lat,
+            lng: coordinates.lng,
+            type: formData.type,
+            severity: "Medium", // You might want to add severity to the form
+            description: `${formData.title} - ${formData.description}`
+          }
+        }, '*');
+        navigate('/dashboard');
+      }
+
+      // Reset form
+      setFormData({
+        title: '',
+        description: '',
+        type: '',
+        locationText: coordinates ? `${coordinates.lat.toFixed(6)}, ${coordinates.lng.toFixed(6)}` : '',
+        age: '',
+        height: '',
+        weight: ''
+      });
       setError('');
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
@@ -81,13 +136,29 @@ const ReportForm: React.FC = () => {
           {error && <p className="error">{error}</p>}
 
           <label>Title</label>
-          <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} required />
+          <input 
+            type="text" 
+            name="title"
+            value={formData.title} 
+            onChange={handleInputChange} 
+            required 
+          />
 
           <label>Description</label>
-          <textarea value={description} onChange={(e) => setDescription(e.target.value)} required />
+          <textarea 
+            name="description"
+            value={formData.description} 
+            onChange={handleInputChange} 
+            required 
+          />
 
           <label>Type of Crime</label>
-          <select value={type} onChange={(e) => setType(e.target.value)} required>
+          <select 
+            name="type"
+            value={formData.type} 
+            onChange={handleInputChange} 
+            required
+          >
             <option value="">Select...</option>
             <option value="Theft">Theft</option>
             <option value="Assault">Assault</option>
@@ -96,16 +167,39 @@ const ReportForm: React.FC = () => {
           </select>
 
           <label>Age (approximate)</label>
-          <input type="number" min="0" value={age} onChange={(e) => setAge(e.target.value)} />
+          <input 
+            type="number" 
+            name="age"
+            min="0" 
+            value={formData.age} 
+            onChange={handleInputChange} 
+          />
 
           <label>Height (in cm)</label>
-          <input type="text" value={height} onChange={(e) => setHeight(e.target.value)} />
+          <input 
+            type="text" 
+            name="height"
+            value={formData.height} 
+            onChange={handleInputChange} 
+          />
 
           <label>Weight (in kg)</label>
-          <input type="text" value={weight} onChange={(e) => setWeight(e.target.value)} />
+          <input 
+            type="text" 
+            name="weight"
+            value={formData.weight} 
+            onChange={handleInputChange} 
+          />
 
           <label>Location</label>
-          <input type="text" value={location} onChange={(e) => setLocation(e.target.value)} required />
+          <input 
+            type="text" 
+            name="locationText"
+            value={formData.locationText} 
+            onChange={handleInputChange} 
+            required 
+            readOnly={!!coordinates}
+          />
 
           <button type="submit">Submit Report</button>
         </form>

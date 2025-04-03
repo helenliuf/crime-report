@@ -1,5 +1,6 @@
 import React from "react";
 import { GoogleMap, LoadScript, Marker, InfoWindow } from "@react-google-maps/api";
+import { useNavigate } from "react-router-dom";
 
 // Define the type for crime reports
 interface CrimeReport {
@@ -23,6 +24,7 @@ const mapContainerStyle = {
 const defaultCenter = { lat: 42.3915, lng: -72.5266 };
 
 const CrimeMap: React.FC = () => {
+  const navigate = useNavigate();
   const [selectedCrime, setSelectedCrime] = React.useState<CrimeReport | null>(null);
   const [isAddingMarker, setIsAddingMarker] = React.useState(false);
   const [markers, setMarkers] = React.useState<CrimeReport[]>(crimeReports);
@@ -43,6 +45,16 @@ const CrimeMap: React.FC = () => {
 
     setMarkers([...markers, newMarker]);
     setIsAddingMarker(false);
+
+    // Navigate to report form with the coordinates
+    navigate('/report', {
+      state: {
+        coordinates: {
+          lat: event.latLng.lat(),
+          lng: event.latLng.lng()
+        }
+      }
+    });
   };
 
   const getCurrentLocation = () => {
