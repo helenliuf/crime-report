@@ -203,8 +203,10 @@ const CrimeMap: React.FC = () => {
               onCloseClick={() => setSelectedCrime(null)}
             >
               <div>
-                <h4>{selectedCrime.type}</h4>
-                <p>Severity: {selectedCrime.severity}</p>
+                <h4>Crime Report</h4>
+                <p><strong>Description:</strong> {selectedCrime.description}</p>
+                <p><strong>Status:</strong> {selectedCrime.status}</p>
+                <p><strong>Reported:</strong> {new Date(selectedCrime.createdAt).toLocaleDateString()}</p>
               </div>
             </InfoWindow>
           )}
