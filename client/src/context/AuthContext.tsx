@@ -7,6 +7,7 @@ interface User {
   name: string;
   email: string;
   role: string;
+  rewardPoints: number; // for the reward UI
 }
 
 interface JWTDecoded {
