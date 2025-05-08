@@ -71,9 +71,29 @@ const addCrimeReport = async (req, res) => {
     }
 };
 
+const verifyCrimeReport = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const crime = await CrimeReport.findById(id);
+        
+        if (!crime) {
+            return res.status(404).json({ message: "Crime report not found" });
+        }
+
+        crime.status = "Verified";
+        const updatedCrime = await crime.save();
+        
+        res.status(200).json(updatedCrime);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error verifying crime report", error });
+    }
+};
+
 module.exports = {
 	getAllCrimes,
 	getCrimeById,
 	addCrimeReport,
     getNearbyCrimes,
+    verifyCrimeReport
 };

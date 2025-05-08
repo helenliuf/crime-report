@@ -5,6 +5,7 @@ import Login from '../pages/Login';
 import Signup from '../pages/Signup';
 import Dashboard from '../pages/Dashboard';
 import ReportForm from '../pages/ReportForm';
+import ReportDetails from '../pages/ReportDetails';
 
 const AppRoutes: React.FC = () => {
   return (
@@ -13,6 +14,7 @@ const AppRoutes: React.FC = () => {
       <Route path="/" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/report" element={<ReportForm />} />
+      <Route path="/report/:id" element={<ReportDetails />} />
     </Routes>
   );
 };

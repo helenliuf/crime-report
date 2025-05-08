@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { CSSProperties } from 'react';
 
 const EmergencyButton: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -6,7 +7,7 @@ const EmergencyButton: React.FC = () => {
   const [isCountingDown, setIsCountingDown] = useState(false);
 
   useEffect(() => {
-    let timer: NodeJS.Timeout;
+    let timer: ReturnType<typeof setTimeout>;
     if (countdown !== null && countdown > 0) {
       timer = setInterval(() => {
         setCountdown(prev => prev !== null ? prev - 1 : null);
@@ -55,7 +56,7 @@ const EmergencyButton: React.FC = () => {
     setIsCountingDown(false);
   };
 
-  const getButtonStyle = () => ({
+  const getButtonStyle = (): CSSProperties => ({
     backgroundColor: isCountingDown ? '#ff4444' : '#ff0000',
     color: 'white',
     padding: '1rem 2rem',
@@ -66,18 +67,18 @@ const EmergencyButton: React.FC = () => {
     boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
     transition: 'all 0.2s',
     margin: '1rem',
-    width: '200px',
-    height: '200px',
+    width: '220px',
+    height: '220px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'column',
-    position: 'relative' as const,
+    position: 'relative',
     overflow: 'hidden'
   });
 
-  const getProgressStyle = () => ({
-    position: 'absolute' as const,
+  const getProgressStyle = (): CSSProperties => ({
+    position: 'absolute',
     bottom: 0,
     left: 0,
     height: '4px',
@@ -101,13 +102,27 @@ const EmergencyButton: React.FC = () => {
           e.currentTarget.style.transform = 'scale(1)';
         }}
       >
-        <span style={{ fontSize: '2rem', fontWeight: 'bold' }}>
+        <span style={{ 
+          fontSize: '2rem',
+          fontWeight: 'bold',
+          marginBottom: '0.5rem'
+        }}>
           {isCountingDown ? 'CANCEL' : 'EMERGENCY'}
         </span>
-        <span style={{ fontSize: '1.5rem', marginTop: '0.5rem' }}>
+        <span style={{ 
+          fontSize: '2rem',
+          marginTop: '0.5rem'
+        }}>
           {isCountingDown ? countdown : '911'}
         </span>
-        {isLoading && <span style={{ marginTop: '0.5rem' }}>Getting location...</span>}
+        {isLoading && (
+          <span style={{ 
+            marginTop: '1rem',
+            fontSize: '1.2rem'
+          }}>
+            Getting location...
+          </span>
+        )}
         {isCountingDown && <div style={getProgressStyle()} />}
       </button>
     </div>

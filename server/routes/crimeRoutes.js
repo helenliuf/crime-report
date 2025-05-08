@@ -5,9 +5,10 @@ const auth = require("../middlewares/authMiddleware"); // Middleware for role ch
 
 router.use(auth.authenticate); //Authentication
 
-router.get("/nearby", auth.authorize(["Police", "Admin"]), CrimeController.getNearbyCrimes);
+router.get("/nearby", auth.authorize(["Citizen", "Police", "Admin"]), CrimeController.getNearbyCrimes);
 router.get("/:id", auth.authorize(["Citizen", "Police", "Admin"]), CrimeController.getCrimeById);
-router.get("/", auth.authorize(["Police", "Admin"]), CrimeController.getAllCrimes);
+router.put("/:id/verify", auth.authorize(["Police", "Admin"]), CrimeController.verifyCrimeReport);
+router.get("/", auth.authorize(["Citizen", "Police", "Admin"]), CrimeController.getAllCrimes);
 router.post("/", auth.authorize(["Citizen"]), CrimeController.addCrimeReport);
 
 module.exports = router;
