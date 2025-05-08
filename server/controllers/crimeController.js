@@ -1,4 +1,5 @@
 const CrimeReport = require("../models/CrimeReport");
+const User = require("../models/User"); // newly added for crime verif
 
 const getAllCrimes = async (req, res) => {
 	try {
@@ -82,6 +83,12 @@ const verifyCrimeReport = async (req, res) => {
 
         crime.status = "Verified";
         const updatedCrime = await crime.save();
+
+        await User.findByIdAndUpdate(
+			crime.userId,
+			{ $inc: { rewardPoints: 1 } },
+			{ new: true }
+		); // newly added for crime verif
         
         res.status(200).json(updatedCrime);
     } catch (error) {

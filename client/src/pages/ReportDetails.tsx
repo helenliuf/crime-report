@@ -117,6 +117,9 @@ const ReportDetails: React.FC = () => {
     lat: report.location.coordinates[1],
     lng: report.location.coordinates[0]
   };
+  
+  // only police or admin can verify
+  const canVerify = (user.role === 'Police' || user.role === 'Admin') && report.status === 'Pending';
 
   return (
     <div style={styles.container}>
@@ -172,7 +175,8 @@ const ReportDetails: React.FC = () => {
           <p style={styles.description}>{report.description}</p>
         </div>
 
-        {user.role === 'Police' && report.status === 'Pending' && (
+        {/* {user.role === 'Police' && report.status === 'Pending' && ( */}
+        {canVerify && (
           <div style={styles.verifySection}>
             <button
               onClick={handleVerify}
