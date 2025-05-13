@@ -1,5 +1,5 @@
 const CrimeReport = require("../../models/CrimeReport"); 
-const { getAllCrimes, getCrimeById, addCrimeReport, getNearbyCrimes } = require("../../controllers/crimeController");
+const { getAllCrimes, getCrimeById, addCrimeReport, getNearbyCrimes, verifyCrimeReport } = require("../../controllers/crimeController");
 const httpMocks = require("node-mocks-http");
 
 const { MongoMemoryServer } = require('mongodb-memory-server');
@@ -412,5 +412,86 @@ describe("getNearbyCrimes function", () => {
     });
   });
 
+
+});
+
+describe("verifyCrimeReport function", () => {
+    let mongoServer;
+
+  beforeAll(async () => {
+      mongoServer = await MongoMemoryServer.create();
+      const uri = mongoServer.getUri();
+      await mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+  });
+
+  afterAll(async () => {
+      await mongoose.connection.close();
+      await mongoServer.stop();
+  });
+
+  beforeEach(async () => {
+      await CrimeReport.deleteMany(); // clear the collection before each test
+  });
+
+  it("should correctly update correct crime verification status", async () => {
+    // dummy crimes
+    const crime1 = new CrimeReport({
+    location: { type: "Point", coordinates: [-71.0589, 42.3601] },
+    userId: "67eb6b2f551fd82eaa773b3c",
+    description: "Theft reported near the mall.",
+    status: "Pending",
+    });
+
+    const crime2 = new CrimeReport({
+        location: { type: "Point", coordinates: [-71.0590, 42.3610] },
+        userId: "67eb6b2f551fd82eaa773b3c",
+        description: "Assault reported in the alley.",
+        status: "Pending",
+    });
+
+    await CrimeReport.insertMany([crime1, crime2]);
+
+    // get _id of crime1
+    const crimeId = crime1._id.toString();
+
+    // pre-condition: crime status is pending
+    const preCrime = await CrimeReport.findById(crimeId);
+    expect(preCrime.status).toEqual("Pending");
+
+    // perform action: verifyCrimeReport with req and res
+    const req = httpMocks.createRequest({
+        params: { id: crimeId },
+    });
+    const res = httpMocks.createResponse();
+
+    await verifyCrimeReport(req, res);
+
+    // post-condition: crime status is verified
+    const postCrime = await CrimeReport.findById(crimeId);
+    expect(postCrime.status).toEqual("Verified");
+
+  });
+
+  it("should return 404 status if crime does not exist", async () => {
+    // pre-condition: crime not found
+    const crimeId = "67eb6b2f551fd82eaa773b3c"
+    const crime = await CrimeReport.findById(crimeId);
+    expect(crime).toBe(null);
+
+    // perform action: verifyCrimeReport req and res
+    const req = httpMocks.createRequest({
+        params: { id: crimeId },
+    });
+    const res = httpMocks.createResponse();
+
+    await verifyCrimeReport(req, res);
+
+    // post-conditions: 404 status code and message
+    expect(res.statusCode).toBe(404);
+    expect(res._getJSONData()).toEqual({
+        message: "Crime report not found",
+    });
+
+  });
 
 });
