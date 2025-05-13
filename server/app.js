@@ -4,6 +4,7 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 dotenv.config();
 
+var authRouter = require("./routes/authRoutes");
 var userRouter = require("./routes/userRoutes");
 var crimeRouter = require("./routes/crimeRoutes");
 const PORT = process.env.PORT || 8080;
@@ -22,13 +23,14 @@ let corsoptions = {
 	origin: "http://localhost:5173",
 	methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
 	credentials: true, // This is required for cookies/auth headers
-  };
-  
+};
+
 app.use(cookieParser());
 app.use(cors(corsoptions));
 
 // ###### Connecting Router ######
 // http://localhost:8080/api/user/xyz
+app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
 app.use("/api/crime", crimeRouter);
 
