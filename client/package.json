@@ -8,9 +8,11 @@
     "start": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "artillery run ./src/tests/test.yaml"
   },
   "dependencies": {
+    "artillery": "^2.0.23",
     "@react-google-maps/api": "^2.20.6",
     "axios": "^1.8.4",
     "cookie-parser": "^1.4.7",
