@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import '../styles/login.css';
 import { useAuth } from '../context/AuthContext';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { postRequest } from '../utils/ApiRequest';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -17,21 +18,14 @@ const Login: React.FC = () => {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:8080/api/user/login', {
-        method: 'POST', 
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({ email, password }), 
-      });
+      const response = await postRequest('http://localhost:8080/api/user/login',{ email, password });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.message || 'Login failed');
+      if (!response.data) {
+        setError(response.data.message || 'Login failed');
         return;
       }
+
+	  const data = response.data;
 
       // Save token and user
       localStorage.setItem('token', data.token);
