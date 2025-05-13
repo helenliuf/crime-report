@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "start": "nodemon server.js",
-    "test": "jest --detectOpenHandles"
+    "test": "jest --coverage"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
