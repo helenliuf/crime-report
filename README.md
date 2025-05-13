@@ -44,6 +44,20 @@ Help UMass Amherst students and Amherst residents feel safer by enabling their a
 
     npm start
 
+## To run tests (client)
+
+1️⃣ Navigate to the client folder
+
+    cd client
+
+2️⃣ Install dependencies
+
+    npm install
+
+3️⃣ Run tests
+
+    npm test
+
 ## To run tests (server)
 
 1️⃣ Navigate to the server folder
@@ -54,6 +68,6 @@ Help UMass Amherst students and Amherst residents feel safer by enabling their a
 
     npm install
 
-3️⃣ Start the server
+3️⃣ Run tests
 
     npm test
