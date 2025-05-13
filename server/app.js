@@ -23,8 +23,8 @@ let corsoptions = {
 	origin: "http://localhost:5173",
 	methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
 	credentials: true, // This is required for cookies/auth headers
-  };
-  
+};
+
 app.use(cookieParser());
 app.use(cors(corsoptions));
 

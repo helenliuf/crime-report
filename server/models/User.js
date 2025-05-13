@@ -11,7 +11,7 @@ const UserSchema = new mongoose.Schema({
 	},
 	phone: { type: String },
 	createdAt: { type: Date, default: Date.now },
-	rewardPoints: {type: Number, default: 0 },
+	rewardPoints: { type: Number, default: 0 },
 });
 
 module.exports = mongoose.model("User", UserSchema);

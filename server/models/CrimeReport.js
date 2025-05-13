@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const CrimeReportSchema = new mongoose.Schema({
-    //Reference to User schema
+	//Reference to User schema
 	userId: {
 		type: mongoose.Schema.Types.ObjectId,
 		ref: "User",
